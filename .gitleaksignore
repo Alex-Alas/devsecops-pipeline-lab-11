@@ -1,5 +1,7 @@
-# Falsos positivos (curl-auth-user): curl -u "$SONAR_TOKEN:" solo referenciaba
-# la variable del secret de GitHub, no un token real. Corregido en el commit siguiente.
+# Falsos positivos de la regla curl-auth-user: el workflow pasaba la variable
+# del secret SONAR_TOKEN (no un token real) con la opcion de usuario de curl.
+# Corregido usando un header Authorization.
 58c397c183cbf32c2edf45f774a27268ccd5dff0:.github/workflows/deploy.yml:curl-auth-user:105
 58c397c183cbf32c2edf45f774a27268ccd5dff0:.github/workflows/deploy.yml:curl-auth-user:109
 58c397c183cbf32c2edf45f774a27268ccd5dff0:.github/workflows/deploy.yml:curl-auth-user:114
+51136989ef9106e0baa34bc0904d5f0f67166b40:.gitleaksignore:curl-auth-user:1
