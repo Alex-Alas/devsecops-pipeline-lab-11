@@ -102,16 +102,17 @@ jobs:
           API="${API%/}/api"
           ORG=$(grep '^sonar.organization=' sonar-project.properties | cut -d= -f2 | tr -d '\r')
           KEY=$(grep '^sonar.projectKey=' sonar-project.properties | cut -d= -f2 | tr -d '\r')
-          if curl -sf -u "$SONAR_TOKEN:" "$API/components/show?component=$KEY" > /dev/null; then
+          AUTH="Authorization: Bearer $SONAR_TOKEN"
+          if curl -sf -H "$AUTH" "$API/components/show?component=$KEY" > /dev/null; then
             echo "Proyecto $KEY ya existe."
           else
             echo "Creando proyecto $KEY en la organización $ORG..."
-            curl -sf -u "$SONAR_TOKEN:" -X POST "$API/projects/create" \
+            curl -sf -H "$AUTH" -X POST "$API/projects/create" \
               -d "organization=$ORG" -d "project=$KEY" -d "name=${KEY#*_}" -d "visibility=public"
             echo
           fi
           echo "Desactivando Automatic Analysis..."
-          curl -s -u "$SONAR_TOKEN:" -X POST "$API/autoscan/activation" \
+          curl -s -H "$AUTH" -X POST "$API/autoscan/activation" \
             -d "projectKey=$KEY" -d "enable=false" -w '\nHTTP %{http_code}\n' || true
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v4

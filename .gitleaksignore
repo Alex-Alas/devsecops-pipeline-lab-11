@@ -1,0 +1,5 @@
+# Falsos positivos (curl-auth-user): curl -u "$SONAR_TOKEN:" solo referenciaba
+# la variable del secret de GitHub, no un token real. Corregido en el commit siguiente.
+58c397c183cbf32c2edf45f774a27268ccd5dff0:.github/workflows/deploy.yml:curl-auth-user:105
+58c397c183cbf32c2edf45f774a27268ccd5dff0:.github/workflows/deploy.yml:curl-auth-user:109
+58c397c183cbf32c2edf45f774a27268ccd5dff0:.github/workflows/deploy.yml:curl-auth-user:114
