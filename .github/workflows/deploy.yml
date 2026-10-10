@@ -90,6 +90,29 @@ jobs:
         run: |
           npm install
           npm test
+      # SonarCloud no permite análisis CI si Automatic Analysis está activo
+      # (falla con exit 3). Este paso crea el proyecto si aún no existe y
+      # desactiva Automatic Analysis, así el pipeline no depende de la UI.
+      - name: Preparar proyecto en SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          API="${SONAR_HOST_URL:-https://sonarcloud.io}"
+          API="${API%/}/api"
+          ORG=$(grep '^sonar.organization=' sonar-project.properties | cut -d= -f2 | tr -d '\r')
+          KEY=$(grep '^sonar.projectKey=' sonar-project.properties | cut -d= -f2 | tr -d '\r')
+          if curl -sf -u "$SONAR_TOKEN:" "$API/components/show?component=$KEY" > /dev/null; then
+            echo "Proyecto $KEY ya existe."
+          else
+            echo "Creando proyecto $KEY en la organización $ORG..."
+            curl -sf -u "$SONAR_TOKEN:" -X POST "$API/projects/create" \
+              -d "organization=$ORG" -d "project=$KEY" -d "name=${KEY#*_}" -d "visibility=public"
+            echo
+          fi
+          echo "Desactivando Automatic Analysis..."
+          curl -s -u "$SONAR_TOKEN:" -X POST "$API/autoscan/activation" \
+            -d "projectKey=$KEY" -d "enable=false" -w '\nHTTP %{http_code}\n' || true
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v4
         env:
